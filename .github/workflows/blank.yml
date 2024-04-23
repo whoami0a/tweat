@@ -1,35 +1,17 @@
-name: Send links to Telegram group
+name: Send Telegram Message Every Hour
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron: '0 * * * *'  # Runs at the start of every hour
 
 jobs:
-  send-links:
+  send-message:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Download links file
-        run: |
-          wget -q $LINKS_FILE_URL -O links.txt
-          echo "Links file downloaded: links.txt"
-
-      - name: Read links from file
-        id: read-links
-        run: |
-          links=$(cat links.txt)
-          echo "LINKS=$links" >> $GITHUB_ENV
-          echo "Links read: $links"
-
-      - name: Send links to Telegram group
-        run: |
-          for link in $LINKS; do
-            echo "Sending link: $link"
-            curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-              -d "chat_id=$GROUP_ID" \
-              -d "text=$link" \
-              -d "parse_mode=Markdown"
-            sleep 20
-          done
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          GROUP_ID: ${{ secrets.GROUP_ID }}
-          LINKS_FILE_URL: ${{ secrets.LINKS_FILE_URL }}
+    - name: Send message to Telegram group
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: "OK !"
