@@ -1,17 +1,27 @@
-name: Run every 5 hours
+name: Send links to Telegram group
 
 on:
-  schedule:
-    - cron: '0 */5 * * *' # Runs every 5 hours
+  workflow_dispatch:
 
 jobs:
-  run-every-5-hours:
+  send-links:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run your script or command
+      - name: Get links from list URL
         run: |
-          # Add your script or command to run here
-          echo "Running every 5 hours"
+          links=$(curl -s "$LIST_URL" | jq -r '.[]')
+          echo "LINKS=$links" >> $GITHUB_ENV
+
+      - name: Send links to Telegram group
+        run: |
+          for link in $LINKS; do
+            curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+              -d "chat_id=$GROUP_ID" \
+              -d "text=$link" \
+              -d "parse_mode=Markdown"
+            sleep 20
+          done
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GROUP_ID: ${{ secrets.GROUP_ID }}
+          LIST_URL: ${{ secrets.LIST_URL }}
