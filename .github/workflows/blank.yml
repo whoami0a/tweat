@@ -1,17 +1,16 @@
-name: Send Telegram Message Every Hour
+name: Send Message to Telegram
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Runs at the start of every hour
+    - cron: '0 * * * *'  # This cron job runs at the top of every hour
 
 jobs:
-  send-message:
+  message:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Send message to Telegram group
-      uses: appleboy/telegram-action@master
-      with:
-        to: ${{ secrets.TELEGRAM_CHAT_ID }}
-        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        message: "OK !"
+      - name: Send Message
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: "OK !"
