@@ -7,14 +7,22 @@ jobs:
   send-links:
     runs-on: ubuntu-latest
     steps:
-      - name: Get links from list URL
+      - name: Download links file
         run: |
-          links=$(curl -s "$LIST_URL" | jq -r '.[]')
+          wget -q $LINKS_FILE_URL -O links.txt
+          echo "Links file downloaded: links.txt"
+
+      - name: Read links from file
+        id: read-links
+        run: |
+          links=$(cat links.txt)
           echo "LINKS=$links" >> $GITHUB_ENV
+          echo "Links read: $links"
 
       - name: Send links to Telegram group
         run: |
           for link in $LINKS; do
+            echo "Sending link: $link"
             curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
               -d "chat_id=$GROUP_ID" \
               -d "text=$link" \
@@ -24,4 +32,4 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           GROUP_ID: ${{ secrets.GROUP_ID }}
-          LIST_URL: ${{ secrets.LIST_URL }}
+          LINKS_FILE_URL: ${{ secrets.LINKS_FILE_URL }}
